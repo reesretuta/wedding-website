@@ -1,0 +1,10 @@
+{
+  "coupleNames": "Claire & Rees",
+  "tagline": "A collection of our wedding day.",
+  "dateLabel": "",
+  "sourceOrderFile": "../custom-sort-order-app/orders/REES_ROUND_3_will_post-9a1e4b1673.json",
+  "skipNamePattern": "^start\\d*\\.(png|jpe?g|heic)$",
+  "skipScreenshots": true,
+  "maxWidth": 2000,
+  "jpegQuality": 85
+}

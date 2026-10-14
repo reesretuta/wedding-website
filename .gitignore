@@ -1,0 +1,9 @@
+# Generated web images (rebuild with: node scripts/prepare-photos.js)
+photos/web/
+photos/.prepare-cache.json
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
