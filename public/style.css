@@ -6,7 +6,8 @@
   --champagne: #c9a87c;
   --champagne-bright: #e2c49a;
   --white: #faf8f5;
-  --font-display: "Bellefair", "Palatino", "Times New Roman", serif;
+  --font-script: "Great Vibes", "Snell Roundhand", "Segoe Script", cursive;
+  --font-display: "Cormorant Garamond", "Palatino", "Times New Roman", serif;
   --font-body: "Commissioner", system-ui, sans-serif;
 }
 
@@ -273,12 +274,12 @@ body.edit-mode .gallery-head h2::after {
 
 .hero h1 {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-script);
   font-weight: 400;
   font-style: normal;
-  font-size: clamp(3.2rem, 11vw, 6.4rem);
-  line-height: 1.05;
-  letter-spacing: 0.04em;
+  font-size: clamp(3.6rem, 13vw, 7.2rem);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
   color: var(--white);
 }
 
@@ -346,10 +347,10 @@ body.edit-mode .gallery-head h2::after {
 .gallery-head h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
-  font-style: normal;
+  font-weight: 500;
+  font-style: italic;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--white);
 }
 
