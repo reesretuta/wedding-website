@@ -8,7 +8,10 @@ const grid = document.getElementById('grid');
 const editGrid = document.getElementById('editGrid');
 const galleryCount = document.getElementById('galleryCount');
 const empty = document.getElementById('empty');
+const hero = document.getElementById('hero');
 const heroMedia = document.getElementById('heroMedia');
+const heroVideoWrap = document.getElementById('heroVideoWrap');
+const heroPlayBtn = document.getElementById('heroPlayBtn');
 
 const filmsGrid = document.getElementById('filmsGrid');
 const filmsTitle = document.getElementById('filmsTitle');
@@ -22,9 +25,18 @@ const lbNext = document.getElementById('lbNext');
 const lbClose = document.getElementById('lbClose');
 
 const videoModal = document.getElementById('videoModal');
-const videoFrame = document.getElementById('videoFrame');
+const videoFrameMount = document.getElementById('videoFrameMount');
 const videoCaption = document.getElementById('videoCaption');
 const videoClose = document.getElementById('videoClose');
+
+/** Official wedding film used as muted hero background. */
+const HERO_VIDEO_TITLE = 'Official Wedding Video';
+let heroFilm = null;
+let heroBgActive = false;
+let heroPlayer = null;
+let modalPlayer = null;
+let captionKillTimer = null;
+let ytApiPromise = null;
 
 const localBar = document.getElementById('localBar');
 const viewModeBtn = document.getElementById('viewModeBtn');
@@ -148,10 +160,147 @@ async function loadFilms() {
     const data = await res.json();
     if (data.title) filmsTitle.textContent = data.title;
     if (data.subtitle) filmsSubtitle.textContent = data.subtitle;
-    renderFilms(data.videos || []);
+    const videos = data.videos || [];
+    renderFilms(videos);
+    setupHeroVideo(videos);
   } catch (_) {
     /* section stays empty */
   }
+}
+
+function setupHeroVideo(videos) {
+  heroFilm =
+    videos.find((v) => v.title === HERO_VIDEO_TITLE) ||
+    videos[0] ||
+    null;
+  if (!heroFilm || !heroVideoWrap) return;
+
+  hero.classList.add('has-video');
+  heroPlayBtn.hidden = false;
+  heroPlayBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openVideo(heroFilm);
+  });
+  hero.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return;
+    openVideo(heroFilm);
+  });
+  startHeroBackground();
+}
+
+function loadYouTubeApi() {
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (ytApiPromise) return ytApiPromise;
+  ytApiPromise = new Promise((resolve) => {
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof prev === 'function') prev();
+      resolve();
+    };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  });
+  return ytApiPromise;
+}
+
+function disableCaptions(player) {
+  if (!player) return;
+  try {
+    player.unloadModule('captions');
+  } catch (_) { /* ignore */ }
+  try {
+    player.setOption('captions', 'track', {});
+  } catch (_) { /* ignore */ }
+  try {
+    player.setOption('captions', 'reload', true);
+  } catch (_) { /* ignore */ }
+}
+
+/** Captions often load a beat after play — keep killing them briefly. */
+function keepCaptionsOff(player, ms = 4000) {
+  disableCaptions(player);
+  if (captionKillTimer) clearInterval(captionKillTimer);
+  const start = Date.now();
+  captionKillTimer = setInterval(() => {
+    disableCaptions(player);
+    if (Date.now() - start > ms) {
+      clearInterval(captionKillTimer);
+      captionKillTimer = null;
+    }
+  }, 400);
+}
+
+async function startHeroBackground() {
+  if (!heroFilm || !heroVideoWrap) return;
+  heroBgActive = true;
+  await loadYouTubeApi();
+  if (!heroBgActive) return;
+
+  // YT.Player replaces #heroVideo; recreate the mount node after destroy.
+  let mount = document.getElementById('heroVideo');
+  if (!mount) {
+    mount = document.createElement('div');
+    mount.id = 'heroVideo';
+    heroVideoWrap.appendChild(mount);
+  }
+
+  if (heroPlayer) {
+    try {
+      heroPlayer.destroy();
+    } catch (_) { /* ignore */ }
+    heroPlayer = null;
+    mount = document.createElement('div');
+    mount.id = 'heroVideo';
+    heroVideoWrap.innerHTML = '';
+    heroVideoWrap.appendChild(mount);
+  }
+
+  heroPlayer = new YT.Player('heroVideo', {
+    videoId: heroFilm.id,
+    playerVars: {
+      autoplay: 1,
+      mute: 1,
+      controls: 0,
+      playsinline: 1,
+      loop: 1,
+      playlist: heroFilm.id,
+      rel: 0,
+      modestbranding: 1,
+      iv_load_policy: 3,
+      disablekb: 1,
+      fs: 0,
+      cc_load_policy: 0,
+      origin: window.location.origin,
+    },
+    events: {
+      onReady(e) {
+        e.target.mute();
+        e.target.playVideo();
+        keepCaptionsOff(e.target);
+      },
+      onStateChange(e) {
+        if (e.data === YT.PlayerState.PLAYING) {
+          keepCaptionsOff(e.target);
+        }
+      },
+      onApiChange(e) {
+        disableCaptions(e.target);
+      },
+    },
+  });
+}
+
+function stopHeroBackground() {
+  heroBgActive = false;
+  if (heroPlayer) {
+    try {
+      heroPlayer.stopVideo();
+      heroPlayer.destroy();
+    } catch (_) { /* ignore */ }
+    heroPlayer = null;
+  }
+  if (heroVideoWrap) heroVideoWrap.innerHTML = '<div id="heroVideo"></div>';
 }
 
 function renderFilms(videos) {
@@ -209,18 +358,72 @@ function wireVideoModal() {
   });
 }
 
-function openVideo(v) {
+async function openVideo(v) {
   closeLightbox();
+  stopHeroBackground();
   videoCaption.textContent = v.title;
-  videoFrame.src = `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0`;
   videoModal.hidden = false;
   document.body.style.overflow = 'hidden';
+
+  await loadYouTubeApi();
+  if (videoModal.hidden) return;
+
+  if (modalPlayer) {
+    try {
+      modalPlayer.destroy();
+    } catch (_) { /* ignore */ }
+    modalPlayer = null;
+  }
+  if (videoFrameMount) {
+    videoFrameMount.innerHTML = '<div id="videoFrame"></div>';
+  }
+
+  modalPlayer = new YT.Player('videoFrame', {
+    videoId: v.id,
+    playerVars: {
+      autoplay: 1,
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1,
+      cc_load_policy: 0,
+      iv_load_policy: 3,
+      origin: window.location.origin,
+    },
+    events: {
+      onReady(e) {
+        e.target.playVideo();
+        keepCaptionsOff(e.target, 6000);
+      },
+      onStateChange(e) {
+        if (e.data === YT.PlayerState.PLAYING) {
+          keepCaptionsOff(e.target, 6000);
+        }
+      },
+      onApiChange(e) {
+        disableCaptions(e.target);
+      },
+    },
+  });
 }
 
 function closeVideo() {
   videoModal.hidden = true;
-  videoFrame.src = '';
+  if (captionKillTimer) {
+    clearInterval(captionKillTimer);
+    captionKillTimer = null;
+  }
+  if (modalPlayer) {
+    try {
+      modalPlayer.stopVideo();
+      modalPlayer.destroy();
+    } catch (_) { /* ignore */ }
+    modalPlayer = null;
+  }
+  if (videoFrameMount) {
+    videoFrameMount.innerHTML = '<div id="videoFrame"></div>';
+  }
   document.body.style.overflow = '';
+  if (heroFilm) startHeroBackground();
 }
 
 function applyMeta(data) {

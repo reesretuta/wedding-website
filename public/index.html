@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&family=Commissioner:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=font3" />
+  <link rel="stylesheet" href="style.css?v=hero-vid3" />
 </head>
 <body>
   <div id="localBar" class="local-bar" hidden>
@@ -23,7 +23,11 @@
   </div>
 
   <header class="hero" id="hero">
-    <div class="hero-media" id="heroMedia" aria-hidden="true"></div>
+    <div class="hero-media" id="heroMedia" aria-hidden="true">
+      <div class="hero-video-wrap" id="heroVideoWrap">
+        <div id="heroVideo"></div>
+      </div>
+    </div>
     <div class="hero-veil"></div>
     <div class="hero-copy">
       <p class="eyebrow" id="dateLabel"></p>
@@ -32,6 +36,7 @@
       <div class="cta-row">
         <a class="cta" href="#gallery">View the gallery</a>
         <a class="cta cta-ghost" href="#films">Watch the films</a>
+        <button type="button" class="cta cta-ghost" id="heroPlayBtn" hidden>Play film</button>
       </div>
     </div>
   </header>
@@ -74,19 +79,12 @@
 
   <div id="videoModal" class="video-modal" hidden>
     <button type="button" class="lb-close" id="videoClose" aria-label="Close">✕</button>
-    <div class="video-frame">
-      <iframe
-        id="videoFrame"
-        title="Wedding video"
-        src=""
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen
-        referrerpolicy="strict-origin-when-cross-origin"
-      ></iframe>
+    <div class="video-frame" id="videoFrameMount">
+      <div id="videoFrame"></div>
     </div>
     <p id="videoCaption" class="lb-caption"></p>
   </div>
 
-  <script src="app.js?v=multi1"></script>
+  <script src="app.js?v=hero-vid4"></script>
 </body>
 </html>
