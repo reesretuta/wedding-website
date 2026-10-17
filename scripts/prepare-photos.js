@@ -99,6 +99,33 @@ async function main() {
     });
   }
 
+  // Prefer existing gallery edits (order / removals) from photos.json when present.
+  const byOriginal = new Map(photos.map((p) => [p.original, p]));
+  let ordered = photos;
+  try {
+    const existing = JSON.parse(await fsp.readFile(MANIFEST_PATH, 'utf8'));
+    if (Array.isArray(existing.photos) && existing.photos.length) {
+      const kept = [];
+      const seen = new Set();
+      for (const p of existing.photos) {
+        const hit = byOriginal.get(p.original);
+        if (hit && !seen.has(hit.original)) {
+          kept.push(hit);
+          seen.add(hit.original);
+        }
+      }
+      for (const p of photos) {
+        if (!seen.has(p.original)) kept.push(p);
+      }
+      ordered = kept;
+      console.log(`Preserved gallery edits: ${kept.length} photos (from existing photos.json)`);
+    }
+  } catch (_) {
+    /* first run — no existing manifest */
+  }
+
+  ordered = ordered.map((p, i) => ({ ...p, id: i + 1 }));
+
   await fsp.writeFile(CACHE_PATH, JSON.stringify(cache, null, 2));
   await fsp.writeFile(
     MANIFEST_PATH,
@@ -108,25 +135,23 @@ async function main() {
         coupleNames: config.coupleNames,
         tagline: config.tagline,
         dateLabel: config.dateLabel || '',
-        count: photos.length,
-        photos,
+        count: ordered.length,
+        photos: ordered,
       },
       null,
       2
     )
   );
 
-  // Symlink/copy web photos into public/photos for static serving
+  // Copy web photos into public/photos (real files — needed for GitHub Pages)
   const publicPhotos = path.join(ROOT, 'public', 'photos');
   await fsp.rm(publicPhotos, { recursive: true, force: true });
-  try {
-    await fsp.symlink(OUT_DIR, publicPhotos, 'dir');
-  } catch (_) {
-    await fsp.cp(OUT_DIR, publicPhotos, { recursive: true });
-  }
+  await fsp.cp(OUT_DIR, publicPhotos, { recursive: true });
 
   console.log('');
-  console.log(`Done. converted=${done} cached=${skipped} failed=${failed} total=${photos.length}`);
+  console.log(
+    `Done. converted=${done} cached=${skipped} failed=${failed} total=${ordered.length}`
+  );
   console.log(`Manifest: ${MANIFEST_PATH}`);
 }
 

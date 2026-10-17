@@ -6,10 +6,22 @@
   <title>Claire & Rees</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Commissioner:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=multi1" />
 </head>
 <body>
+  <div id="localBar" class="local-bar" hidden>
+    <span class="local-label">Local</span>
+    <div class="mode-toggle" role="group" aria-label="Site mode">
+      <button type="button" id="viewModeBtn" class="mode-btn active">View</button>
+      <button type="button" id="editModeBtn" class="mode-btn">Edit</button>
+    </div>
+    <span id="editStatus" class="edit-status"></span>
+    <p class="local-hint" id="editHint" hidden>
+      Click / Shift+click / ⌘-click to select · drag to move · ✕ to remove · auto-saves
+    </p>
+  </div>
+
   <header class="hero" id="hero">
     <div class="hero-media" id="heroMedia" aria-hidden="true"></div>
     <div class="hero-veil"></div>
@@ -17,21 +29,35 @@
       <p class="eyebrow" id="dateLabel"></p>
       <h1 id="coupleNames">Claire &amp; Rees</h1>
       <p class="tagline" id="tagline">A collection of our wedding day.</p>
-      <a class="cta" href="#gallery">View the gallery</a>
+      <div class="cta-row">
+        <a class="cta" href="#gallery">View the gallery</a>
+        <a class="cta cta-ghost" href="#films">Watch the films</a>
+      </div>
     </div>
   </header>
 
-  <main id="gallery" class="gallery-section">
-    <header class="gallery-head">
-      <h2>The day</h2>
-      <p id="galleryCount" class="gallery-meta"></p>
-    </header>
-    <div id="grid" class="grid" aria-label="Wedding photo gallery"></div>
-    <p id="empty" class="empty" hidden>
-      Photos aren’t ready yet. From the project folder run:
-      <code>node scripts/prepare-photos.js</code>
-      then refresh.
-    </p>
+  <main>
+    <section id="gallery" class="gallery-section">
+      <header class="gallery-head">
+        <h2>The day</h2>
+        <p id="galleryCount" class="gallery-meta"></p>
+      </header>
+      <div id="grid" class="grid" aria-label="Wedding photo gallery"></div>
+      <div id="editGrid" class="edit-grid" hidden aria-label="Edit photo order"></div>
+      <p id="empty" class="empty" hidden>
+        Photos aren’t ready yet. From the project folder run:
+        <code>node scripts/prepare-photos.js</code>
+        then refresh.
+      </p>
+    </section>
+
+    <section id="films" class="films-section">
+      <header class="gallery-head">
+        <h2 id="filmsTitle">Films</h2>
+        <p id="filmsSubtitle" class="gallery-meta"></p>
+      </header>
+      <div id="filmsGrid" class="films-grid" aria-label="Wedding videos"></div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -46,6 +72,21 @@
     <p id="lbCaption" class="lb-caption"></p>
   </div>
 
-  <script src="/app.js"></script>
+  <div id="videoModal" class="video-modal" hidden>
+    <button type="button" class="lb-close" id="videoClose" aria-label="Close">✕</button>
+    <div class="video-frame">
+      <iframe
+        id="videoFrame"
+        title="Wedding video"
+        src=""
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    </div>
+    <p id="videoCaption" class="lb-caption"></p>
+  </div>
+
+  <script src="app.js?v=multi1"></script>
 </body>
 </html>

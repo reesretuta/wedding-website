@@ -1,4 +1,4 @@
-# Generated web images (rebuild with: node scripts/prepare-photos.js)
+# Working cache from prepare (public/photos is what gets deployed)
 photos/web/
 photos/.prepare-cache.json
 
