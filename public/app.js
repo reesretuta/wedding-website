@@ -37,6 +37,7 @@ let heroPlayer = null;
 let modalPlayer = null;
 let captionKillTimer = null;
 let ytApiPromise = null;
+let heroUnlockArmed = false;
 
 const localBar = document.getElementById('localBar');
 const viewModeBtn = document.getElementById('viewModeBtn');
@@ -231,6 +232,35 @@ function keepCaptionsOff(player, ms = 4000) {
   }, 400);
 }
 
+function forceHeroPlay() {
+  if (!heroPlayer || !heroBgActive) return;
+  try {
+    heroPlayer.mute();
+    heroPlayer.playVideo();
+  } catch (_) { /* ignore */ }
+}
+
+/** iOS/Safari often blocks muted iframe autoplay until a gesture. */
+function armHeroPlaybackUnlock() {
+  if (heroUnlockArmed) return;
+  heroUnlockArmed = true;
+  const opts = { capture: true, passive: true };
+  const unlock = () => {
+    forceHeroPlay();
+    setTimeout(forceHeroPlay, 150);
+    setTimeout(forceHeroPlay, 600);
+  };
+  const onGesture = () => {
+    unlock();
+    window.removeEventListener('touchstart', onGesture, opts);
+    window.removeEventListener('pointerdown', onGesture, opts);
+    window.removeEventListener('scroll', onGesture, opts);
+  };
+  window.addEventListener('touchstart', onGesture, opts);
+  window.addEventListener('pointerdown', onGesture, opts);
+  window.addEventListener('scroll', onGesture, opts);
+}
+
 async function startHeroBackground() {
   if (!heroFilm || !heroVideoWrap) return;
   heroBgActive = true;
@@ -257,6 +287,7 @@ async function startHeroBackground() {
   }
 
   heroPlayer = new YT.Player('heroVideo', {
+    host: 'https://www.youtube-nocookie.com',
     videoId: heroFilm.id,
     playerVars: {
       autoplay: 1,
@@ -276,12 +307,24 @@ async function startHeroBackground() {
     events: {
       onReady(e) {
         e.target.mute();
-        e.target.playVideo();
+        forceHeroPlay();
+        // Retries help when the first autoplay is ignored on mobile.
+        setTimeout(forceHeroPlay, 250);
+        setTimeout(forceHeroPlay, 1000);
+        setTimeout(forceHeroPlay, 2500);
         keepCaptionsOff(e.target);
+        armHeroPlaybackUnlock();
       },
       onStateChange(e) {
         if (e.data === YT.PlayerState.PLAYING) {
           keepCaptionsOff(e.target);
+        }
+        // If mobile leaves it cued/paused, keep nudging play while hero is active.
+        if (
+          heroBgActive &&
+          (e.data === YT.PlayerState.CUED || e.data === YT.PlayerState.PAUSED)
+        ) {
+          setTimeout(forceHeroPlay, 200);
         }
       },
       onApiChange(e) {
@@ -289,6 +332,7 @@ async function startHeroBackground() {
       },
     },
   });
+  armHeroPlaybackUnlock();
 }
 
 function stopHeroBackground() {
