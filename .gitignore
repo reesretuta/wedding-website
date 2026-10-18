@@ -1,5 +1,7 @@
 # Working cache from prepare (public/photos is what gets deployed)
 photos/web/
+photos/more/
+photos/photobooth/
 photos/.prepare-cache.json
 
 # macOS

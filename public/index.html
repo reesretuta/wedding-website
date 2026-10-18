@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&family=Commissioner:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=mobile-hero1" />
+  <link rel="stylesheet" href="style.css?v=pb3col" />
 </head>
 <body>
   <div id="localBar" class="local-bar" hidden>
@@ -32,12 +32,14 @@
     <div class="hero-copy">
       <h1 id="coupleNames">Claire &amp; Rees</h1>
       <p class="tagline" id="tagline">A collection of our wedding day.</p>
-      <p class="tagline-sub" id="dateLabel">10.18.26 at the Maybourne Beverly Hills.</p>
-      <div class="cta-row">
-        <a class="cta" href="#gallery">View the gallery</a>
-        <a class="cta cta-ghost" href="#films">Watch the films</a>
-        <button type="button" class="cta cta-ghost" id="heroPlayBtn" hidden>Play film</button>
-      </div>
+      <p class="tagline-sub" id="dateLabel">10.18.25 at the Maybourne Beverly Hills.</p>
+      <nav class="cta-row" id="sectionNav" aria-label="Site sections">
+        <a class="cta is-active" href="#gallery" data-section="gallery">The day</a>
+        <a class="cta" href="#more" data-section="more" id="navMore" hidden>Welcome &amp; after</a>
+        <a class="cta" href="#photobooth" data-section="photobooth" id="navPhotobooth" hidden>Photobooth</a>
+        <a class="cta" href="#films" data-section="films">Films</a>
+        <button type="button" class="cta" id="heroPlayBtn" hidden>Play film</button>
+      </nav>
     </div>
   </header>
 
@@ -54,6 +56,22 @@
         <code>node scripts/prepare-photos.js</code>
         then refresh.
       </p>
+    </section>
+
+    <section id="more" class="gallery-section more-section" hidden>
+      <header class="gallery-head">
+        <h2 id="moreTitle">Welcome drinks, After Party, Misc</h2>
+        <p id="moreCount" class="gallery-meta"></p>
+      </header>
+      <div id="moreGrid" class="grid" aria-label="Welcome drinks, after party, and misc photos"></div>
+    </section>
+
+    <section id="photobooth" class="gallery-section more-section" hidden>
+      <header class="gallery-head">
+        <h2 id="photoboothTitle">Photobooth</h2>
+        <p id="photoboothCount" class="gallery-meta"></p>
+      </header>
+      <div id="photoboothGrid" class="grid" aria-label="Photobooth photos"></div>
     </section>
 
     <section id="films" class="films-section">
@@ -85,6 +103,6 @@
     <p id="videoCaption" class="lb-caption"></p>
   </div>
 
-  <script src="app.js?v=mobile-hero1"></script>
+  <script src="app.js?v=nav1"></script>
 </body>
 </html>

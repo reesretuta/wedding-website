@@ -109,6 +109,8 @@ body.has-local-bar {
 
 /* In edit mode, skip the hero so the photo grid is immediately visible */
 body.edit-mode .hero,
+body.edit-mode .more-section,
+body.edit-mode #photobooth,
 body.edit-mode .films-section,
 body.edit-mode .site-footer {
   display: none !important;
@@ -343,8 +345,8 @@ body.edit-mode .gallery-head h2::after {
 .cta {
   display: inline-block;
   padding: 0.85rem 1.4rem;
-  border: 1px solid rgba(226, 196, 154, 0.55);
-  color: var(--champagne-bright);
+  border: 1px solid rgba(207, 198, 186, 0.35);
+  color: var(--stone);
   background: transparent;
   text-decoration: none;
   font: inherit;
@@ -356,20 +358,15 @@ body.edit-mode .gallery-head h2::after {
 }
 
 .cta:hover {
+  border-color: var(--champagne-bright);
+  color: var(--champagne-bright);
+}
+
+.cta.is-active,
+.cta.is-active:hover {
   background: var(--champagne);
   border-color: var(--champagne);
   color: var(--ink);
-}
-
-.cta-ghost {
-  border-color: rgba(207, 198, 186, 0.35);
-  color: var(--stone);
-}
-
-.cta-ghost:hover {
-  background: transparent;
-  border-color: var(--champagne-bright);
-  color: var(--champagne-bright);
 }
 
 /* ----- Gallery ----- */
@@ -377,6 +374,11 @@ body.edit-mode .gallery-head h2::after {
   padding: 5rem 4vw 6rem;
   background:
     linear-gradient(180deg, var(--ink) 0%, #1b1714 40%, var(--ink) 100%);
+}
+
+.more-section {
+  padding-top: 2rem;
+  border-top: 1px solid rgba(207, 198, 186, 0.1);
 }
 
 .gallery-head {
@@ -425,6 +427,18 @@ body.edit-mode .gallery-head h2::after {
     grid-column: span 2;
     grid-row: span 2;
   }
+}
+
+/* Photobooth: always a uniform 3-across grid */
+#photoboothGrid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+#photoboothGrid .tile:nth-child(6n + 1) {
+  grid-column: span 1;
+  grid-row: span 1;
+  aspect-ratio: 1;
 }
 
 .tile {
@@ -747,5 +761,9 @@ body.edit-mode .gallery-head h2::after {
   }
   .tile:nth-child(6n + 1) {
     aspect-ratio: 1;
+  }
+  #photoboothGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
   }
 }

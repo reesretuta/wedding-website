@@ -1,8 +1,12 @@
 {
   "coupleNames": "Claire & Rees",
   "tagline": "A collection of our wedding day.",
-  "dateLabel": "10.18.26 at the Maybourne Beverly Hills.",
+  "dateLabel": "10.18.25 at the Maybourne Beverly Hills.",
   "sourceOrderFile": "../custom-sort-order-app/orders/REES_ROUND_3_will_post-9a1e4b1673.json",
+  "moreSourceDir": "/Users/claire/Downloads/wedding_website_friday",
+  "moreTitle": "Welcome drinks, After Party, Misc",
+  "photoboothSourceDir": "/Users/claire/Downloads/wedding_website_photobooth",
+  "photoboothTitle": "Photobooth",
   "skipNamePattern": "^start\\d*\\.(png|jpe?g|heic)$",
   "skipScreenshots": true,
   "maxWidth": 2000,

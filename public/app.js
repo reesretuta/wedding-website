@@ -8,6 +8,17 @@ const grid = document.getElementById('grid');
 const editGrid = document.getElementById('editGrid');
 const galleryCount = document.getElementById('galleryCount');
 const empty = document.getElementById('empty');
+const moreSection = document.getElementById('more');
+const moreTitle = document.getElementById('moreTitle');
+const moreCount = document.getElementById('moreCount');
+const moreGrid = document.getElementById('moreGrid');
+const photoboothSection = document.getElementById('photobooth');
+const photoboothTitle = document.getElementById('photoboothTitle');
+const photoboothCount = document.getElementById('photoboothCount');
+const photoboothGrid = document.getElementById('photoboothGrid');
+const sectionNav = document.getElementById('sectionNav');
+const navMore = document.getElementById('navMore');
+const navPhotobooth = document.getElementById('navPhotobooth');
 const hero = document.getElementById('hero');
 const heroMedia = document.getElementById('heroMedia');
 const heroVideoWrap = document.getElementById('heroVideoWrap');
@@ -46,8 +57,11 @@ const editStatus = document.getElementById('editStatus');
 const editHint = document.getElementById('editHint');
 
 let photos = [];
+let morePhotos = [];
+let photoboothPhotos = [];
 let manifestMeta = {};
 let lbIndex = -1;
+let lbList = [];
 let isLocal = false;
 let mode = 'view'; // 'view' | 'edit'
 let dragSrcIndex = -1;
@@ -79,9 +93,126 @@ async function init() {
     empty.hidden = false;
   }
 
+  await loadExtraGallery({
+    url: 'more.json',
+    sectionEl: moreSection,
+    titleEl: moreTitle,
+    countEl: moreCount,
+    gridEl: moreGrid,
+    setPhotos: (list) => {
+      morePhotos = list;
+    },
+    getPhotos: () => morePhotos,
+    label: 'More photo',
+    navEl: navMore,
+  });
+  await loadExtraGallery({
+    url: 'photobooth.json',
+    sectionEl: photoboothSection,
+    titleEl: photoboothTitle,
+    countEl: photoboothCount,
+    gridEl: photoboothGrid,
+    setPhotos: (list) => {
+      photoboothPhotos = list;
+    },
+    getPhotos: () => photoboothPhotos,
+    label: 'Photobooth photo',
+    navEl: navPhotobooth,
+  });
   await loadFilms();
+  wireSectionNav();
   wireLightbox();
   wireVideoModal();
+}
+
+async function loadExtraGallery({
+  url,
+  sectionEl,
+  titleEl,
+  countEl,
+  gridEl,
+  setPhotos,
+  getPhotos,
+  label,
+  navEl,
+}) {
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = data.photos || [];
+    setPhotos(list);
+    if (!list.length || !sectionEl) return;
+    if (data.title && titleEl) titleEl.textContent = data.title;
+    if (countEl) {
+      countEl.textContent = `${list.length} photograph${list.length === 1 ? '' : 's'}`;
+    }
+    sectionEl.hidden = false;
+    if (navEl) navEl.hidden = false;
+    renderExtraGrid(gridEl, getPhotos, label);
+  } catch (_) {
+    /* optional section */
+  }
+}
+
+function setActiveSectionNav(sectionId) {
+  if (!sectionNav) return;
+  sectionNav.querySelectorAll('.cta[data-section]').forEach((el) => {
+    el.classList.toggle('is-active', el.dataset.section === sectionId);
+  });
+}
+
+function wireSectionNav() {
+  if (!sectionNav) return;
+
+  sectionNav.querySelectorAll('a.cta[data-section]').forEach((link) => {
+    link.addEventListener('click', () => {
+      setActiveSectionNav(link.dataset.section);
+    });
+  });
+
+  const targets = [...sectionNav.querySelectorAll('a.cta[data-section]')]
+    .map((link) => document.getElementById(link.dataset.section))
+    .filter((el) => el && !el.hidden);
+
+  if (!targets.length || !('IntersectionObserver' in window)) return;
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      if (!visible.length) return;
+      setActiveSectionNav(visible[0].target.id);
+    },
+    { rootMargin: '-35% 0px -45% 0px', threshold: [0.1, 0.25, 0.5] }
+  );
+  targets.forEach((el) => io.observe(el));
+}
+
+function renderExtraGrid(gridEl, getPhotos, label) {
+  if (!gridEl) return;
+  const list = getPhotos();
+  gridEl.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach((photo, i) => {
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tile';
+    tile.setAttribute('aria-label', `${label} ${i + 1}`);
+
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = photo.src;
+    img.alt = '';
+    tile.appendChild(img);
+
+    tile.addEventListener('click', () => openLightbox(i, list));
+    frag.appendChild(tile);
+  });
+  gridEl.appendChild(frag);
+  observeTilesIn(gridEl);
 }
 
 async function checkLocal() {
@@ -502,7 +633,7 @@ function renderGrid() {
     img.alt = '';
     tile.appendChild(img);
 
-    tile.addEventListener('click', () => openLightbox(i));
+    tile.addEventListener('click', () => openLightbox(i, photos));
     frag.appendChild(tile);
   });
   grid.appendChild(frag);
@@ -707,7 +838,12 @@ async function savePhotos() {
 }
 
 function observeTiles() {
-  const tiles = grid.querySelectorAll('.tile');
+  observeTilesIn(grid);
+}
+
+function observeTilesIn(root) {
+  if (!root) return;
+  const tiles = root.querySelectorAll('.tile');
   if (!('IntersectionObserver' in window)) {
     tiles.forEach((t) => t.classList.add('visible'));
     return;
@@ -768,27 +904,28 @@ function wireLightbox() {
   });
 }
 
-function openLightbox(i) {
+function openLightbox(i, list) {
   if (mode === 'edit') return;
   closeVideo();
+  lbList = list && list.length ? list : photos;
   lightbox.hidden = false;
   document.body.style.overflow = 'hidden';
   showLightbox(i);
 }
 
 function showLightbox(i) {
-  if (!photos.length) return;
-  lbIndex = (i + photos.length) % photos.length;
-  const photo = photos[lbIndex];
+  if (!lbList.length) return;
+  lbIndex = (i + lbList.length) % lbList.length;
+  const photo = lbList[lbIndex];
   lbImg.src = photo.src;
-  lbCaption.textContent = `${lbIndex + 1} / ${photos.length}`;
+  lbCaption.textContent = `${lbIndex + 1} / ${lbList.length}`;
   preload(lbIndex + 1);
   preload(lbIndex - 1);
 }
 
 function preload(i) {
-  if (!photos.length) return;
-  const photo = photos[(i + photos.length) % photos.length];
+  if (!lbList.length) return;
+  const photo = lbList[(i + lbList.length) % lbList.length];
   const im = new Image();
   im.src = photo.src;
 }
@@ -797,5 +934,6 @@ function closeLightbox() {
   lightbox.hidden = true;
   lbImg.src = '';
   lbIndex = -1;
+  lbList = [];
   if (videoModal.hidden) document.body.style.overflow = '';
 }
