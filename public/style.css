@@ -1,10 +1,12 @@
 :root {
-  --ink: #14110f;
-  --ink-soft: #2a2420;
-  --fog: #ebe6df;
-  --stone: #cfc6ba;
+  /* Light beige page */
+  --ink: #e8dfd2;
+  --ink-soft: #ddd4c5;
+  --ink-deep: #2c2118;
+  --fog: #2c2118;
+  --stone: #6a5748;
   --champagne: #c9a87c;
-  --champagne-bright: #e2c49a;
+  --champagne-bright: #a67c52;
   --white: #faf8f5;
   --font-script: "Great Vibes", "Snell Roundhand", "Segoe Script", cursive;
   --font-display: "Cormorant Garamond", "Palatino", "Times New Roman", serif;
@@ -76,7 +78,7 @@ body.has-local-bar {
 }
 
 .mode-btn.active {
-  background: var(--ink);
+  background: var(--ink-deep);
   color: var(--white);
 }
 
@@ -288,8 +290,8 @@ body.edit-mode .gallery-head h2::after {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(20, 17, 15, 0.25) 0%, rgba(20, 17, 15, 0.35) 40%, rgba(20, 17, 15, 0.9) 100%),
-    radial-gradient(ellipse at 30% 20%, rgba(201, 168, 124, 0.12), transparent 55%);
+    linear-gradient(180deg, rgba(44, 33, 24, 0.35) 0%, rgba(44, 33, 24, 0.45) 40%, rgba(44, 33, 24, 0.88) 100%),
+    radial-gradient(ellipse at 30% 20%, rgba(201, 168, 124, 0.16), transparent 55%);
   pointer-events: none;
 }
 
@@ -345,7 +347,7 @@ body.edit-mode .gallery-head h2::after {
 .cta {
   display: inline-block;
   padding: 0.85rem 1.4rem;
-  border: 1px solid rgba(207, 198, 186, 0.35);
+  border: 1px solid rgba(106, 87, 72, 0.35);
   color: var(--stone);
   background: transparent;
   text-decoration: none;
@@ -366,14 +368,40 @@ body.edit-mode .gallery-head h2::after {
 .cta.is-active:hover {
   background: var(--champagne);
   border-color: var(--champagne);
-  color: var(--ink);
+  color: var(--ink-deep);
+}
+
+/* Hero CTAs stay light on the dark video veil */
+.hero .cta {
+  border-color: rgba(250, 248, 245, 0.4);
+  color: rgba(250, 248, 245, 0.88);
+}
+
+.hero .cta:hover {
+  border-color: var(--champagne-bright);
+  color: var(--champagne-bright);
+}
+
+.hero .cta.is-active,
+.hero .cta.is-active:hover {
+  background: var(--champagne);
+  border-color: var(--champagne);
+  color: var(--ink-deep);
+}
+
+.hero .tagline {
+  color: rgba(250, 248, 245, 0.78);
+}
+
+.hero .tagline-sub {
+  color: var(--champagne-bright);
 }
 
 /* ----- Gallery ----- */
 .gallery-section {
   padding: 5rem 4vw 6rem;
   background:
-    linear-gradient(180deg, var(--ink) 0%, #1b1714 40%, var(--ink) 100%);
+    linear-gradient(180deg, var(--ink) 0%, var(--ink-soft) 40%, var(--ink) 100%);
 }
 
 .more-section {
@@ -400,7 +428,7 @@ body.edit-mode .gallery-head h2::after {
   font-style: italic;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
   letter-spacing: 0.04em;
-  color: var(--white);
+  color: var(--ink-deep);
 }
 
 .gallery-meta {
@@ -515,7 +543,7 @@ body.edit-mode .gallery-head h2::after {
 .films-section {
   padding: 5rem 4vw 6rem;
   border-top: 1px solid rgba(207, 198, 186, 0.1);
-  background: linear-gradient(180deg, #1b1714 0%, var(--ink) 100%);
+  background: linear-gradient(180deg, var(--ink-soft) 0%, var(--ink) 100%);
 }
 
 .films-grid {
@@ -608,7 +636,7 @@ body.edit-mode .gallery-head h2::after {
   font-size: clamp(1.1rem, 1.9vw, 1.4rem);
   font-weight: 400;
   font-style: normal;
-  color: var(--white);
+  color: var(--ink-deep);
   line-height: 1.25;
   letter-spacing: 0.03em;
   white-space: nowrap;
@@ -656,7 +684,7 @@ body.edit-mode .gallery-head h2::after {
 .site-footer {
   padding: 3rem 4vw 4rem;
   text-align: center;
-  border-top: 1px solid rgba(207, 198, 186, 0.12);
+  border-top: 1px solid rgba(44, 33, 24, 0.12);
 }
 
 .site-footer p {
